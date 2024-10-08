@@ -1,0 +1,4 @@
+/target
+.idea
+compose.yml
+docker-compose.yml
