@@ -33,13 +33,21 @@ pub enum AddSubcommand {
         depends_on: Option<Vec<String>>,
         #[arg(short, long)]
         command: Option<String>,
+        #[arg(short, long)]
+        build: Option<String>
     },
     Network {
         #[arg(short, long)]
         driver: Option<String>,
+        #[arg(short, long)]
+        external: Option<String>,
+        #[arg(short, long)]
+        name: String
     },
     Volume {
         #[arg(short, long)]
         driver: Option<String>,
+        #[arg(short, long)]
+        external: Option<String>
     },
 }
