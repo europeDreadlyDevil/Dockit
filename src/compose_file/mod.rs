@@ -9,15 +9,20 @@ pub struct ComposeFile {
     networks: Option<HashMap<String, Network>>,
 }
 
-
 impl ComposeFile {
     pub(crate) fn add_service(&mut self, name: &str, service: Service) {
-        self.services.insert(name.to_string(), service);
+        self.services.insert(name.into(), service);
     }
 
-    pub(crate) fn add_network(&mut self, network: Network, name: &str) {
+    pub(crate) fn add_network(&mut self, name: &str, network: Network) {
         if let Some(ref mut nets) = self.networks {
-            nets.insert(name.to_string(), network);
+            nets.insert(name.into(), network);
+        }
+    }
+
+    pub(crate) fn add_volume(&mut self, name: &str, volume: Volume) {
+        if let Some(ref mut vols) = self.volumes {
+            vols.insert(name.into(), volume);
         }
     }
 }
@@ -110,7 +115,17 @@ pub struct Volume {
 }
 
 impl Volume {
+    pub(crate) fn driver(&mut self, driver: Option<String>) {
+        self.driver = driver
+    }
 
+    pub(crate) fn external(&mut self, external: Option<String>) {
+        if let Some(name) = external {
+            let mut map = HashMap::new();
+            map.insert("name".into(), name);
+            self.external = Some(map)
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]

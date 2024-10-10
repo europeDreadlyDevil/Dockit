@@ -1,5 +1,5 @@
 use crate::cli::{AddSubcommand, CaptainCommand, CLI};
-use crate::compose_file::{ComposeFile, Network, Service};
+use crate::compose_file::{ComposeFile, Network, Service, Volume};
 use clap::Parser;
 use std::env;
 use std::fs::{File, OpenOptions};
@@ -14,10 +14,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match cli.command {
         CaptainCommand::Init => {
             let compose = ComposeFile::default();
-            File::create(env::current_dir()?.as_path().join("docker-compose.yml"))?
-                .write(serde_yaml::to_string(&compose)?.as_bytes())?;
+            OpenOptions::new()
+                .read(true)
+                .write(true)
+                .truncate(true)
+                .open(env::current_dir()?.as_path().join("docker-compose.yml"))?
+                .write_all(serde_yaml::to_string(&compose)?.as_bytes())?;
         }
-        CaptainCommand::Add(command) => match command {
+        CaptainCommand::Add(command) => match *command {
             AddSubcommand::Service {
                 container_name,
                 image,
@@ -46,12 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                 compose.add_service(&container_name, service);
 
-                OpenOptions::new()
-                    .write(true)
-                    .read(true)
-                    .truncate(true)
-                    .open("docker-compose.yml")?
-                    .write_all(serde_yaml::to_string(&compose).unwrap().as_bytes())?;
+                write_to_compose_file(compose)?;
             }
             AddSubcommand::Network { driver, external, name } => {
                 let mut yaml_str = String::new();
@@ -63,18 +62,37 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 network.driver(driver);
                 network.external(external);
 
-                compose.add_network(network, &name);
+                compose.add_network(&name, network);
 
-                OpenOptions::new()
-                    .write(true)
-                    .read(true)
-                    .truncate(true)
-                    .open("docker-compose.yml")?
-                    .write_all(serde_yaml::to_string(&compose).unwrap().as_bytes())?;
+                write_to_compose_file(compose)?;
             }
-            AddSubcommand::Volume { .. } => {}
+            AddSubcommand::Volume { driver, external, name } => {
+                let mut yaml_str = String::new();
+                File::open("docker-compose.yml")?.read_to_string(&mut yaml_str)?;
+                let mut compose: ComposeFile = serde_yaml::from_str(&yaml_str)?;
+
+                let mut volume = Volume::default();
+
+                volume.driver(driver);
+                volume.external(external);
+
+                compose.add_volume(&name, volume);
+
+                write_to_compose_file(compose)?;
+            }
         },
     }
+
+    Ok(())
+}
+
+fn write_to_compose_file(compose_file: ComposeFile) -> Result<(), Box<dyn std::error::Error>>  {
+    OpenOptions::new()
+        .write(true)
+        .read(true)
+        .truncate(true)
+        .open("docker-compose.yml")?
+        .write_all(serde_yaml::to_string(&compose_file).unwrap().as_bytes())?;
 
     Ok(())
 }
