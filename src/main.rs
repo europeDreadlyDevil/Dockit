@@ -17,6 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             OpenOptions::new()
                 .read(true)
                 .write(true)
+                .create(true)
                 .truncate(true)
                 .open(env::current_dir()?.as_path().join("docker-compose.yml"))?
                 .write_all(serde_yaml::to_string(&compose)?.as_bytes())?;
