@@ -1,9 +1,12 @@
 [package]
-name = "captain"
+name = "dockit"
+keywords = ['management', 'docker-compose', 'docker']
+description = "App for manage docker-compose files"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
 
 [dependencies]
 clap = {version = "4.5.19", features = ["derive"]}
 serde = { version = "1.0.210", features = ["derive"] }
-serde_yaml = "0.9.34+deprecated"
+serde_yaml = "0.9.34"

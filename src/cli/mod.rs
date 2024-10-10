@@ -11,7 +11,7 @@ pub struct CLI {
 pub enum CaptainCommand {
     Init,
     #[command(subcommand)]
-    Add(AddSubcommand),
+    Add(Box<AddSubcommand>),
 }
 
 #[derive(Subcommand, Clone)]
@@ -48,6 +48,8 @@ pub enum AddSubcommand {
         #[arg(short, long)]
         driver: Option<String>,
         #[arg(short, long)]
-        external: Option<String>
+        external: Option<String>,
+        #[arg(short, long)]
+        name: String
     },
 }
