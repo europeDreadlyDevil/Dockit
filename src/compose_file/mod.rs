@@ -90,7 +90,7 @@ impl Service {
     }
     pub(crate) fn build(&mut self, dockerfile: Option<String>) {
         if dockerfile.is_some() {
-            self.build = Some(BuildConfig {dockerfile, context: "./app".into()})
+            self.build = Some(BuildConfig {dockerfile, context: ".".into()})
         }
     }
 }
