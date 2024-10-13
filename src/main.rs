@@ -4,6 +4,7 @@ use clap::Parser;
 use std::env;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
+use std::path::PathBuf;
 
 mod cli;
 mod compose_file;
@@ -12,14 +13,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = CLI::parse();
 
     match cli.command {
-        CaptainCommand::Init => {
+        CaptainCommand::Init { path } => {
+            let mut docker_path = env::current_dir()?.as_path().join("docker-compose.yml");
+            if let Some(user_path) = path {
+                docker_path = PathBuf::from(user_path).join("docker-compose.yml");
+            }
             let compose = ComposeFile::default();
             OpenOptions::new()
                 .read(true)
                 .write(true)
                 .create(true)
                 .truncate(true)
-                .open(env::current_dir()?.as_path().join("docker-compose.yml"))?
+                .open(docker_path)?
                 .write_all(serde_yaml::to_string(&compose)?.as_bytes())?;
         }
         CaptainCommand::Add(command) => match *command {

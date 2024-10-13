@@ -9,7 +9,10 @@ pub struct CLI {
 
 #[derive(Subcommand, Clone)]
 pub enum CaptainCommand {
-    Init,
+    Init {
+        #[arg(short, long)]
+        path: Option<String>
+    },
     #[command(subcommand)]
     Add(Box<AddSubcommand>),
 }
